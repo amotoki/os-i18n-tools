@@ -19,7 +19,7 @@ function check_updated() {
   grep -v -E '^[-+]"POT-Creation-Date:' | \
   grep -v -E '^(\+\+\+|---) [ab]/' >/dev/null || revert_po_file $file
 }
- 
+
 function revert_po_file() {
   echo "$f is unchanged"
   git checkout -- $file
