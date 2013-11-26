@@ -5,6 +5,7 @@
 
 HORIZON_REPO=/opt/stack/horizon
 TX_FORCE_FETCH=0
+TX_CMD=/usr/local/bin/tx
 
 if [ "$TX_FORCE_FETCH" -ne 0 ]; then
   FORCE_OPT="-f"
@@ -13,7 +14,7 @@ fi
 cd $HORIZON_REPO
 git pull
 
-tx pull -a $FORCE_OPT
+$TX_CMD pull -a $FORCE_OPT
 
 cd horizon
 ../manage.py compilemessages

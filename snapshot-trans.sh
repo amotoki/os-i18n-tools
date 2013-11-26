@@ -10,6 +10,7 @@ LANG=ja
 DIR_REPO=$HOME/horizon-ja
 BRANCH_JA=trans-ja-havana
 BRANCH_UPSTREAM=origin/stable/havana
+TX_CMD=/usr/local/bin/tx
 
 function check_updated() {
   local file=$1
@@ -27,7 +28,7 @@ function revert_po_file() {
 
 cd $DIR_REPO
 git checkout $BRANCH_JA
-tx pull -f -l $LANG
+$TX_CMD pull -f -l $LANG
 
 POFILES=$(ls */locale/en/LC_MESSAGES/*.po)
 for f in $POFILES; do
