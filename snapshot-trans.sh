@@ -18,6 +18,7 @@ function check_updated() {
   grep -E '^[-+]' | \
   grep -v -E '^[-+]#:' | \
   grep -v -E '^[-+]"POT-Creation-Date:' | \
+  grep -v -E '^[-+]"PO-Revision-Date:' | \
   grep -v -E '^(\+\+\+|---) [ab]/' >/dev/null || revert_po_file $file
 }
 
@@ -30,7 +31,7 @@ cd $DIR_REPO
 git checkout $BRANCH_JA
 $TX_CMD pull -f -l $LANG
 
-POFILES=$(ls */locale/en/LC_MESSAGES/*.po)
+POFILES=$(ls */locale/$LANG/LC_MESSAGES/*.po)
 for f in $POFILES; do
   check_updated $f
 done
