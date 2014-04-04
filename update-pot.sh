@@ -1,15 +1,29 @@
-#!/bin/bash -x
+#!/bin/bash
 
 ######################################################################
-# Update POT files in Horizon
+# Just Update POT files in Horizon (e.g. for tx push -s)
 ######################################################################
 
-MERGE_UPSTREAM=0
-LANG=ja
 DIR_REPO=$HOME/horizon
-BRANCH=stable/havana
-BRANCH_UPSTREAM=origin/stable/havana
-TX_CMD=/usr/local/bin/tx
+BRANCH=master
+PULL=0
+
+function usage {
+  echo "Usage: $0 [--branch|-b branch] [--pull] [-h]"
+  exit 1
+}
+
+while true; do
+  if [ -z "$1" ]; then
+    break
+  fi
+  case "$1" in
+    -b|--branch) BRANCH=$2; shift;;
+    --pull) PULL=1;;
+    *) usage;;
+  esac
+  shift
+done
 
 function check_updated() {
   local file=$1
@@ -27,7 +41,9 @@ function revert_po_file() {
 
 cd $DIR_REPO
 git checkout $BRANCH
-git pull
+if [ $PULL -eq 1 ]; then
+  git pull
+fi
 
 ./run_tests.sh -N --makemessages
 
