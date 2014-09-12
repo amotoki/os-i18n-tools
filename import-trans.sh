@@ -4,10 +4,13 @@
 ######################################################################
 
 HORIZON_REPO=/opt/stack/horizon
+TX_THRESH=30
 TX_FORCE_FETCH=1
 TX_CMD=/usr/local/bin/tx
-TX_OPTS="-a --minimum-perc=20"
+TX_OPTS="-a --minimum-perc=$TX_THRESH"
 DO_GIT_PULL=0
+
+TOP_DIR=$(cd $(dirname "$0") && pwd)
 
 if [ "$TX_FORCE_FETCH" -ne 0 ]; then
   TX_OPTS+=" -f"
@@ -17,6 +20,14 @@ cd $HORIZON_REPO
 if [ "$DO_GIT_PULL" -ne 0 ]; then
   git pull
 fi
+
+git checkout -- horizon/locale/
+git checkout -- openstack_dashboard/locale/
+git status | grep django.mo | xargs rm
+git status | grep djangojs.mo | xargs rm
+git status | grep django.po | xargs rm
+git status | grep djangojs.po | xargs rm
+git status | grep /locale/ | xargs rm -rf
 
 $TX_CMD pull $TX_OPTS
 
@@ -30,5 +41,7 @@ cd ..
 rm -f horizon/locale/en/LC_MESSAGES/django.mo
 rm -f horizon/locale/en/LC_MESSAGES/djangojs.mo
 rm -f openstack_dashboard/locale/en/LC_MESSAGES/django.mo
+
+$TOP_DIR/update-lang-list.sh
 
 sudo service apache2 reload
