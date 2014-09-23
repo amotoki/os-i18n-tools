@@ -8,7 +8,7 @@ TX_THRESH=30
 TX_FORCE_FETCH=1
 TX_CMD=/usr/local/bin/tx
 TX_OPTS="-a --minimum-perc=$TX_THRESH"
-DO_GIT_PULL=0
+DO_GIT_PULL=1
 
 TOP_DIR=$(cd $(dirname "$0") && pwd)
 
@@ -17,9 +17,6 @@ if [ "$TX_FORCE_FETCH" -ne 0 ]; then
 fi
 
 cd $HORIZON_REPO
-if [ "$DO_GIT_PULL" -ne 0 ]; then
-  git pull
-fi
 
 git checkout -- horizon/locale/
 git checkout -- openstack_dashboard/locale/
@@ -28,6 +25,11 @@ git status | grep djangojs.mo | xargs rm
 git status | grep django.po | xargs rm
 git status | grep djangojs.po | xargs rm
 git status | grep /locale/ | xargs rm -rf
+
+if [ "$DO_GIT_PULL" -ne 0 ]; then
+  git branch --set-upstream-to=origin/master master
+  git pull
+fi
 
 $TX_CMD pull $TX_OPTS
 
