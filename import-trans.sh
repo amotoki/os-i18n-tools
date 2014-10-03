@@ -29,6 +29,7 @@ git status | grep /locale/ | xargs rm -rf
 if [ "$DO_GIT_PULL" -ne 0 ]; then
   git branch --set-upstream-to=origin/master master
   git pull
+  sudo pip install -e .
 fi
 
 $TX_CMD pull $TX_OPTS
