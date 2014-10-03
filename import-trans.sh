@@ -4,6 +4,7 @@
 ######################################################################
 
 HORIZON_REPO=/opt/stack/horizon
+TARGET_BRANCH=proposed/juno
 TX_THRESH=30
 TX_FORCE_FETCH=1
 TX_CMD=/usr/local/bin/tx
@@ -27,7 +28,8 @@ git status | grep djangojs.po | xargs rm
 git status | grep /locale/ | xargs rm -rf
 
 if [ "$DO_GIT_PULL" -ne 0 ]; then
-  git branch --set-upstream-to=origin/master master
+  git branch --set-upstream-to=origin/$TARGET_BRANCH $TARGET_BRANCH
+  git checkout $TARGET_BRANCH
   git pull
   sudo pip install -e .
 fi
