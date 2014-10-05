@@ -5,11 +5,23 @@
 
 HORIZON_REPO=/opt/stack/horizon
 TARGET_BRANCH=proposed/juno
+RELEASE=juno
 TX_THRESH=30
 TX_FORCE_FETCH=1
+
 TX_CMD=/usr/local/bin/tx
 TX_OPTS="-a --minimum-perc=$TX_THRESH"
 DO_GIT_PULL=1
+
+setup_tx_config() {
+    local release=$1
+    if `grep translations-$release .tx/config >/dev/null`; then
+        # .tx/config already has resoruce entries for the targeted release
+        return
+    fi
+    # If not, modify .tx/config from the existing .tx/config
+    sed -i -e "s|translations\(-[a-z]\+\)\?\]$|translations-$release\]|" .tx/config
+}
 
 TOP_DIR=$(cd $(dirname "$0") && pwd)
 
@@ -33,6 +45,8 @@ if [ "$DO_GIT_PULL" -ne 0 ]; then
   git pull
   sudo pip install -e .
 fi
+
+setup_tx_config $RELEASE
 
 $TX_CMD pull $TX_OPTS
 
