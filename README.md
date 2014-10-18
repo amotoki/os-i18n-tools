@@ -5,6 +5,7 @@ Utilities to manage OpenStack Dashboard translations.
 
 * **propose-trans.sh**: A script to download Transifex translations and prepare a patch
 * **import-trans.sh**: A script to import Transifex translations into Horizon repo
+* **update-pot.sh**: A script to update POT files and check if it has meaningful change
 * **snapshot-trans.sh**: A scirpt to fetch Transifex translation of a given language
   and commit it as a snapshot to Horizon repo
 

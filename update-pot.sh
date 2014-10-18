@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 ######################################################################
 # Just Update POT files in Horizon (e.g. for tx push -s)
@@ -39,8 +39,20 @@ function revert_po_file() {
   git checkout -- $file
 }
 
+setup_work_branch() {
+    if `git branch | grep $BRANCH >/dev/null 2>&1`; then
+        git checkout $BRANCH
+    else
+        git checkout -b $BRANCH origin/$BRANCH
+    fi
+}
+
+if [ ! -d $DIR_REPO ]; then
+  echo "$DIR_REPO does not exist."
+  exit 1
+fi
 cd $DIR_REPO
-git checkout $BRANCH
+setup_work_branch
 if [ $PULL -eq 1 ]; then
   git pull
 fi
@@ -55,4 +67,9 @@ done
 if ! git status | grep modified: >/dev/null; then
   echo "***** No changes in PO files *****"
   exit 1
+else
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  echo "!!!!! English PO files are updated. !!!!!"
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+  git status
 fi
