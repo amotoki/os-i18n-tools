@@ -4,8 +4,10 @@
 ######################################################################
 
 HORIZON_REPO=/opt/stack/horizon
-TARGET_BRANCH=proposed/juno
 RELEASE=juno
+#TARGET_BRANCH=proposed/juno
+TARGET_BRANCH=stable/juno
+#TARGET_BRANCH=master
 TX_THRESH=30
 TX_FORCE_FETCH=1
 
@@ -31,6 +33,7 @@ fi
 
 cd $HORIZON_REPO
 
+git checkout -- .tx
 git checkout -- horizon/locale/
 git checkout -- openstack_dashboard/locale/
 git status | grep django.mo | xargs rm
