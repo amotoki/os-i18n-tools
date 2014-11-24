@@ -3,27 +3,44 @@
 # Import translations from Transifex and reload Apache running Horizon
 ######################################################################
 
-HORIZON_REPO=/opt/stack/horizon
+# master branch
+#RELEASE=master
+#TARGET_BRANCH=$RELEASE
+
+# stable branch
 RELEASE=juno
-#TARGET_BRANCH=proposed/juno
-TARGET_BRANCH=stable/juno
-#TARGET_BRANCH=master
+TARGET_BRANCH=stable/$RELEASE
+#TARGET_BRANCH=proposed/$RELEASE
+
+HORIZON_REPO=/opt/stack/horizon
 TX_THRESH=30
 TX_FORCE_FETCH=1
 
-TX_CMD=/usr/local/bin/tx
+#TX_CMD=/usr/local/bin/tx
 TX_OPTS="-a --minimum-perc=$TX_THRESH"
 DO_GIT_PULL=1
 
 setup_tx_config() {
     local release=$1
-    if `grep translations-$release .tx/config >/dev/null`; then
+    local slug
+    if [ "$release" = "master" ]; then
+      slug=translations
+    else
+      slug=translations-$release
+    fi
+    if `grep "$slug\]" .tx/config >/dev/null`; then
         # .tx/config already has resoruce entries for the targeted release
         return
     fi
     # If not, modify .tx/config from the existing .tx/config
-    sed -i -e "s|translations\(-[a-z]\+\)\?\]$|translations-$release\]|" .tx/config
+    sed -i -e "s|translations\(-[a-z]\+\)\?\]$|$slug\]|" .tx/config
 }
+
+TX_CMD=`which tx`
+if [ ! -n "$TX_CMD" ]; then
+  echo "Transifex 'tx' command not found"
+  exit 1
+fi
 
 TOP_DIR=$(cd $(dirname "$0") && pwd)
 
