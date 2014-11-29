@@ -1,17 +1,9 @@
-#!/bin/bash -x
+#!/bin/bash
 ######################################################################
 # Import translations from Transifex and reload Apache running Horizon
 ######################################################################
 
-# master branch
-#RELEASE=master
-#TARGET_BRANCH=$RELEASE
-
-# stable branch
 RELEASE=juno
-TARGET_BRANCH=stable/$RELEASE
-#TARGET_BRANCH=proposed/$RELEASE
-
 HORIZON_REPO=/opt/stack/horizon
 TX_THRESH=30
 TX_FORCE_FETCH=1
@@ -19,6 +11,42 @@ TX_FORCE_FETCH=1
 #TX_CMD=/usr/local/bin/tx
 TX_OPTS="-a --minimum-perc=$TX_THRESH"
 DO_GIT_PULL=1
+
+usage_exit() {
+    set +o xtrace
+    echo "Usage: $0 [options]"
+    echo ""
+    echo "Options:"
+    echo "  -r RELEASE : Specify release name in lower case (e.g. juno, icehouse, ...)"
+    echo "               (Default: $RELEASE)"
+    echo "  -b BRANCH  : Specify a target branch name."
+    echo "               If unspecified, it will be stable/RELEASE."
+    echo "               (Default: stable/$RELEASE)"
+    echo "  -d WORKDIR : Horizon working git repo (Default: $HORIZON_REPO)"
+    echo "  -m THRESH  : Minimum percentage of a translation (Default: $TX_THRESH)"
+    exit 1
+}
+
+while getopts b:d:m:r:h OPT; do
+    case $OPT in
+        b) TARGET_BRANCH=$OPTARG ;;
+        d) HORIZON_REPO=$OPTARG ;;
+        m) TX_THRESH=$OPTARG ;;
+        r) RELEASE=$OPTARG ;;
+        h) usage_exit ;;
+        \?) usage_exit ;;
+    esac
+done
+
+if [ ! -n "$TARGET_BRANCH" ]; then
+  if [ "$RELEASE" = "master" ]; then
+    TARGET_BRANCH=$RELEASE
+  else
+    TARGET_BRANCH=stable/$RELEASE
+  fi
+fi
+
+set -o xtrace
 
 setup_tx_config() {
     local release=$1
