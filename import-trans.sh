@@ -3,6 +3,8 @@
 # Import translations from Transifex and reload Apache running Horizon
 ######################################################################
 
+logger -i -t `basename $0` "Started ($*)"
+
 RELEASE=juno
 HORIZON_REPO=/opt/stack/horizon
 TX_THRESH=30
@@ -112,3 +114,5 @@ rm -f openstack_dashboard/locale/en/LC_MESSAGES/django.mo
 $TOP_DIR/update-lang-list.sh
 
 sudo service apache2 reload
+
+logger -i -t `basename $0` "Completed."
