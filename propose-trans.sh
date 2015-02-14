@@ -13,7 +13,7 @@ usage_exit() {
     echo "               (Default: $RELEASE)"
     echo "  -b BRANCH  : Specify a target branch name."
     echo "               If unspecified, it will be stable/RELEASE."
-    echo "               (Default: $BASE_BRANCH)"
+    echo "               (Default: stable/$RELEASE)"
     echo "  -d WORKDIR : Horizon working git repo (Default: $WORKDIR)"
     echo "  -m THRESH  : Minimum percentage of a translation (Default: $THRESH)"
     exit 1
