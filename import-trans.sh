@@ -113,6 +113,9 @@ rm -f openstack_dashboard/locale/en/LC_MESSAGES/django.mo
 
 $TOP_DIR/update-lang-list.sh
 
+DJANGO_SETTINGS_MODULE=openstack_dashboard.settings python manage.py collectstatic --noinput
+DJANGO_SETTINGS_MODULE=openstack_dashboard.settings python manage.py compress --force
+
 sudo service apache2 reload
 
 logger -i -t `basename $0` "Completed."
