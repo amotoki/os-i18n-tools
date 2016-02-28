@@ -7,7 +7,10 @@ RELEASE=master
 ZANATA_VERSION=master
 DEVSTACK_DIR=/opt/stack
 THRESH=30
+
 DO_GIT_PULL=1
+
+PROJECTS="horizon trove-dashboard sahara-dashboard"
 
 TOP_DIR=$(cd $(dirname "$0") && pwd)
 
@@ -119,9 +122,11 @@ set -o xtrace
 
 check_zanata_cli
 
-cleanup_project horizon
-update_project horizon
-pull_project horizon
+for PROJECT in $PROJECTS; do
+    cleanup_project $PROJECT
+    update_project $PROJECT
+    pull_project $PROJECT
+done
 
 reload_horizon
 
