@@ -10,7 +10,7 @@ THRESH=30
 
 DO_GIT_PULL=1
 
-PROJECTS="horizon trove-dashboard sahara-dashboard"
+PROJECTS="horizon trove-dashboard sahara-dashboard django_openstack_auth"
 
 TOP_DIR=$(cd $(dirname "$0") && pwd)
 
@@ -72,9 +72,14 @@ pull_project() {
     zanata-cli -B pull -e --min-doc-percent 30
 
     for module in "$module_names"; do
-        cd $module
-        DJANGO_SETTINGS_MODULE=openstack_dashboard.settings ../manage.py compilemessages
-        cd -
+        compress_po_files $module
+        if [ "$project" = "django_openstack_auth" ]; then
+            python setup.py compile_catalog
+        else
+            cd $module
+            DJANGO_SETTINGS_MODULE=openstack_dashboard.settings ../manage.py compilemessages
+            cd -
+        fi
     done
 }
 
@@ -105,6 +110,7 @@ reload_horizon() {
     # Update LANGUAGES list in horizon settings
     $TOP_DIR/update-lang-list.sh
 
+    cd $DEVSTACK_DIR/horizon
     DJANGO_SETTINGS_MODULE=openstack_dashboard.settings python manage.py collectstatic --noinput
     DJANGO_SETTINGS_MODULE=openstack_dashboard.settings python manage.py compress --force
     sudo service apache2 reload
