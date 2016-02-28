@@ -3,9 +3,59 @@
 # Import translations from Transifex and reload Apache running Horizon
 ######################################################################
 
+RELEASE=master
 ZANATA_VERSION=master
+DEVSTACK_DIR=/opt/stack
+THRESH=30
+DO_GIT_PULL=1
+
+TOP_DIR=$(cd $(dirname "$0") && pwd)
 
 . /usr/local/jenkins/slave_scripts/common_translation_update.sh
+
+usage_exit() {
+    set +o xtrace
+    echo "Usage: $0 [options]"
+    echo ""
+    echo "Options:"
+    echo "  -r RELEASE : Specify release name in lower case (e.g. liberty, mitaka, ...)"
+    echo "               (Default: $RELEASE)"
+    echo "  -b BRANCH  : Specify a target branch name."
+    echo "               If unspecified, it will be stable/RELEASE."
+    echo "               (Default: stable/$RELEASE)"
+    echo "  -m THRESH  : Minimum percentage of a translation (Default: $THRESH)"
+    exit 1
+}
+
+parse_opts() {
+    while getopts b:d:m:r:h OPT; do
+        case $OPT in
+            b) TARGET_BRANCH=$OPTARG ;;
+            m) THRESH=$OPTARG ;;
+            r) RELEASE=$OPTARG ;;
+            h) usage_exit ;;
+            \?) usage_exit ;;
+        esac
+    done
+
+    if [ ! -n "$TARGET_BRANCH" ]; then
+      if [ "$RELEASE" = "master" ]; then
+        TARGET_BRANCH=$RELEASE
+        ZANATA_VERSION=master
+      else
+        TARGET_BRANCH=stable/$RELEASE
+        ZANATA_VERSION=stable-$RELEASE
+      fi
+    fi
+}
+
+check_zanata_cli() {
+    local ZANATA_CMD=`which zanata-cli`
+    if [ ! -n "$ZANATA_CMD" ]; then
+      echo "'$ZANATA_CMD' command not found"
+      exit 1
+    fi
+}
 
 pull_project() {
     local project=$1
@@ -48,68 +98,31 @@ update_project() {
     fi
 }
 
-logger -i -t `basename $0` "Started ($*)"
+reload_horizon() {
+    # Update LANGUAGES list in horizon settings
+    $TOP_DIR/update-lang-list.sh
 
-RELEASE=master
-ZANATA_VERSION=master
-DEVSTACK_DIR=/opt/stack
-THRESH=30
-
-DO_GIT_PULL=1
-
-usage_exit() {
-    set +o xtrace
-    echo "Usage: $0 [options]"
-    echo ""
-    echo "Options:"
-    echo "  -r RELEASE : Specify release name in lower case (e.g. liberty, mitaka, ...)"
-    echo "               (Default: $RELEASE)"
-    echo "  -b BRANCH  : Specify a target branch name."
-    echo "               If unspecified, it will be stable/RELEASE."
-    echo "               (Default: stable/$RELEASE)"
-    echo "  -m THRESH  : Minimum percentage of a translation (Default: $THRESH)"
-    exit 1
+    DJANGO_SETTINGS_MODULE=openstack_dashboard.settings python manage.py collectstatic --noinput
+    DJANGO_SETTINGS_MODULE=openstack_dashboard.settings python manage.py compress --force
+    sudo service apache2 reload
 }
 
-while getopts b:d:m:r:h OPT; do
-    case $OPT in
-        b) TARGET_BRANCH=$OPTARG ;;
-        m) THRESH=$OPTARG ;;
-        r) RELEASE=$OPTARG ;;
-        h) usage_exit ;;
-        \?) usage_exit ;;
-    esac
-done
+# ----------------------------------------
+# Main logic
+# ----------------------------------------
 
-if [ ! -n "$TARGET_BRANCH" ]; then
-  if [ "$RELEASE" = "master" ]; then
-    TARGET_BRANCH=$RELEASE
-    ZANATA_VERSION=master
-  else
-    TARGET_BRANCH=stable/$RELEASE
-    ZANATA_VERSION=stable-$RELEASE
-  fi
-fi
+logger -i -t `basename $0` "Started ($*)"
+
+parse_opts
 
 set -o xtrace
 
-ZANATA_CMD=`which zanata-cli`
-if [ ! -n "$ZANATA_CMD" ]; then
-  echo "'$ZANATA_CMD' command not found"
-  exit 1
-fi
-
-TOP_DIR=$(cd $(dirname "$0") && pwd)
+check_zanata_cli
 
 cleanup_project horizon
 update_project horizon
 pull_project horizon
 
-$TOP_DIR/update-lang-list.sh
-
-DJANGO_SETTINGS_MODULE=openstack_dashboard.settings python manage.py collectstatic --noinput
-DJANGO_SETTINGS_MODULE=openstack_dashboard.settings python manage.py compress --force
-
-sudo service apache2 reload
+reload_horizon
 
 logger -i -t `basename $0` "Completed."
