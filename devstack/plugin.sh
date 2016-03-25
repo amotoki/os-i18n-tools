@@ -19,6 +19,12 @@ function configure_checksite_dependencies {
              (cd ${DESIGNATEDASHBOARD_DIR}/designatedashboard; DJANGO_SETTINGS_MODULE=openstack_dashboard.settings ../manage.py compilemessages)
          fi
     fi
+    if is_service_enabled murano && is_service_enabled horizon; then
+         # Compile message catalogs
+         if [ -d ${MURANO_DASHBOARD_DIR}/muranodashboard/locale ]; then
+             (cd ${MURANO_DASHBOARD_DIR}/muranodashboard; DJANGO_SETTINGS_MODULE=openstack_dashboard.settings ../manage.py compilemessages)
+         fi
+    fi
 }
 
 # check for service enabled
