@@ -29,3 +29,12 @@ The script does the following:
 * Compile message catalogs
 * Update LANGUAGES settings in Horizon ``openstack_dashboard/settings.py``
 * Restart apache2 service
+
+DevStack plugin
+---------------
+
+``devstack`` directory is a DevStack plugin which is a complementary tool
+to support i18n environment using DevStack.
+To use this,
+
+    enable_plugin horizon-i18n-tools https://github.com/amotoki/horizon-i18n-tools.git
