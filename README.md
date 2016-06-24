@@ -1,3 +1,51 @@
+====================
+OpenStack i18n tools
+====================
+
+This repository stores various tools which are related to OpenStack i18n
+but are not maintained in the official i18n repository.
+
+This includes:
+
+* glossary management tool
+* Horizon translation import from Zanata
+* DevStack plugin for Horizon i18n check site
+
+Glossary management tool
+========================
+
+Preparation
+-----------
+
+``pip install .``
+
+Commands
+--------
+
+After running pip install, you will have the following commands:
+
+* ``os-i18n-glossary-tool`` converts glossary file format between PO and YAML.
+* ``os-glossary-ja-tool`` converts Japanese glossary on OpenStack Wiki to YAML format.
+
+Workflow to update Japanese glossary
+------------------------------------
+
+* Retrieve the source of https://wiki.openstack.org/wiki/I18nTeam/team/ja/glossary
+  ("最新版" section only) and save it to ``wiki-ja-glossary.txt`` (example).
+* ``os-glossary-ja-tool wiki-ja-glossary.txt wiki-ja-glossary.yaml``
+* ``os-i18n-glossary-tool write-po wiki-ja-glossary.yaml wiki-ja-glossary.po``
+* ``msgmerge wiki-ja-glossary.po i18n/locale/i18n.pot | diff -u wiki-ja-glossary.po - | colordiff | less -r``
+
+  * If some entry is added, there is a new entry in the master glossary.
+    In this case, add a new entry to Japanese glossary on OpenStack wiki.
+  * If some entry is deleted, there is a new entry in Japanese glossary.
+    In this case, propose the new entry to the i18n repo.
+
+* Copy ``wiki-ja-glossary.po`` to ``i18n/locale/ja/LC_MESSAGES/i18n.po``
+  and propose the change to Gerrit.
+* Once the review is merged into the i18n repo, Zanata admin will manually
+  upload it to Zanata.
+
 horizon-i18n-tools
 ==================
 
